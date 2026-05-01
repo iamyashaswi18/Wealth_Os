@@ -1,0 +1,1726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#04060e">
+<title>Wealth OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════
+   DESIGN SYSTEM
+   Sora (geometric humanist) + Space Mono (data)
+   Obsidian base · Single ice accent per screen
+   Premium private-banking terminal aesthetic
+═══════════════════════════════════════════════════ */
+:root {
+  --bg0:  #04060e;
+  --bg1:  #080c18;
+  --bg2:  #0c1220;
+  --bg3:  #101828;
+  --bg4:  #141e30;
+  --bg5:  #1a2438;
+
+  --ln0:  #1c2a40;
+  --ln1:  #243248;
+  --ln2:  #2c3c58;
+
+  /* Per-member accents */
+  --you:  #60a5fa;   /* sky blue  */
+  --you2: #93c5fd;
+  --you-d:rgba(96,165,250,0.08);
+  --you-g:rgba(96,165,250,0.20);
+
+  --wife:  #f9a8d4;  /* rose      */
+  --wife2: #fbcfe8;
+  --wife-d:rgba(249,168,212,0.08);
+  --wife-g:rgba(249,168,212,0.20);
+
+  --devit:  #6ee7b7; /* emerald   */
+  --devit2: #a7f3d0;
+  --devit-d:rgba(110,231,183,0.08);
+  --devit-g:rgba(110,231,183,0.20);
+
+  --gold:  #fbbf24;
+  --gold-d:rgba(251,191,36,0.10);
+  --red:   #f87171;
+  --red-d: rgba(248,113,113,0.10);
+  --sage:  #6ee7b7;
+
+  --t0: #f0f6ff;
+  --t1: #94a8c8;
+  --t2: #4a5e80;
+  --t3: #2a3858;
+
+  --sora: 'Sora', sans-serif;
+  --mono: 'Space Mono', monospace;
+
+  --r:  10px;
+  --r2: 14px;
+  --r3: 18px;
+
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --nav-h:  60px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  background: var(--bg0);
+  color: var(--t0);
+  font-family: var(--sora);
+  min-height: 100dvh;
+  max-width: 430px;
+  margin: 0 auto;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Ambient background glow */
+body::before {
+  content: '';
+  position: fixed;
+  top: -30%; left: 50%;
+  transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(96,165,250,0.04) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
+}
+
+/* Fine grid */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(96,165,250,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(96,165,250,0.018) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ═══════════════ HEADER ═══════════════ */
+.hdr {
+  position: sticky; top: 0; z-index: 300;
+  background: rgba(4,6,14,0.92);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border-bottom: 1px solid var(--ln0);
+  padding: calc(var(--safe-t) + 14px) 18px 0;
+}
+.hdr-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 14px;
+}
+.wordmark {
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--t2);
+}
+.wordmark span { color: var(--you); }
+.hdr-right { text-align: right; }
+.hdr-lbl { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--t3); margin-bottom: 3px; font-family: var(--mono); }
+.hdr-val {
+  font-family: var(--mono);
+  font-size: 20px; font-weight: 700;
+  color: var(--you); letter-spacing: -0.5px;
+  transition: color 0.3s;
+}
+
+/* Stat strip */
+.stat-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--ln0);
+}
+.stat-strip-item {
+  padding: 9px 4px;
+  border-right: 1px solid var(--ln0);
+  text-align: center;
+}
+.stat-strip-item:last-child { border-right: none; }
+.ssl { font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: var(--t3); margin-bottom: 3px; font-family: var(--mono); }
+.ssv { font-size: 10px; font-weight: 700; font-family: var(--mono); }
+
+/* ═══════════════ BOTTOM NAV ═══════════════ */
+.nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  background: rgba(6,9,18,0.96);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid var(--ln0);
+  display: flex; z-index: 500;
+  padding-bottom: var(--safe-b);
+}
+.nb {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 10px 2px 8px; border: none; background: none;
+  cursor: pointer; gap: 4px; color: var(--t3);
+  font-family: var(--sora); transition: color 0.2s;
+  position: relative;
+}
+.nb.active { color: var(--you); }
+.nb[data-tab="wife"].active  { color: var(--wife);  }
+.nb[data-tab="devit"].active { color: var(--devit); }
+.nb[data-tab="log"].active   { color: var(--gold);  }
+.nb.active::after {
+  content: '';
+  position: absolute; top: 0; left: 20%; right: 20%;
+  height: 1px; background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+.nb-ico  { font-size: 15px; line-height: 1; }
+.nb-lbl  { font-size: 8px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+
+/* ═══════════════ SCREENS ═══════════════ */
+.screen {
+  display: none; position: relative; z-index: 1;
+  padding-bottom: calc(var(--nav-h) + 20px + var(--safe-b));
+  animation: fadeUp 0.2s ease both;
+}
+.screen.active { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ═══════════════ SECTION HEADER ═══════════════ */
+.sh {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  padding: 20px 18px 12px;
+}
+.sh-left {}
+.sh-eyebrow { font-size: 8px; letter-spacing: 3px; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; font-family: var(--mono); }
+.sh-title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--t0); }
+.sh-btn {
+  background: var(--bg3); border: 1px solid var(--ln1);
+  border-radius: var(--r); padding: 8px 14px;
+  font-family: var(--sora); font-size: 11px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  display: flex; align-items: center; gap: 5px;
+}
+.sh-btn:active { opacity: 0.7; }
+
+/* ═══════════════ MEMBER SUMMARY BANNER ═══════════════ */
+.member-banner {
+  margin: 0 16px 12px;
+  border-radius: var(--r2);
+  padding: 16px;
+  border: 1px solid var(--ln1);
+  position: relative; overflow: hidden;
+}
+.member-banner::before {
+  content: '';
+  position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  opacity: 0.04;
+}
+.mb-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.mb-lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--t2); margin-bottom: 4px; font-family: var(--mono); }
+.mb-val {
+  font-family: var(--mono);
+  font-size: 28px; font-weight: 700;
+  letter-spacing: -1px; line-height: 1;
+}
+.mb-right { text-align: right; }
+.mb-stat-label { font-size: 9px; color: var(--t2); margin-bottom: 2px; font-family: var(--mono); }
+.mb-stat-val   { font-size: 14px; font-weight: 700; font-family: var(--mono); }
+.mb-chips { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.mb-chip {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--ln1); color: var(--t1);
+}
+
+/* ═══════════════ FUND CARD ═══════════════ */
+.fund-list { padding: 0 16px; }
+
+.fund-card {
+  background: var(--bg2);
+  border: 1px solid var(--ln0);
+  border-radius: var(--r2);
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.fund-card.paused { opacity: 0.6; }
+.fund-card.paused .fc-name::after {
+  content: ' PAUSED';
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--gold); margin-left: 6px;
+  font-family: var(--mono);
+}
+
+/* Card top stripe */
+.fc-stripe { height: 2px; width: 100%; }
+
+.fc-main { padding: 13px 14px 10px; }
+.fc-row1 { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.fc-left {}
+.fc-name { font-size: 13px; font-weight: 700; color: var(--t0); margin-bottom: 4px; }
+.fc-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.fc-chip {
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); padding: 2px 7px; border-radius: 4px;
+  background: var(--bg3); border: 1px solid var(--ln0); color: var(--t2);
+}
+.fc-chip.hi { color: var(--you); border-color: rgba(96,165,250,0.3); background: var(--you-d); }
+.fc-chip.hi-wife  { color: var(--wife);  border-color: rgba(249,168,212,0.3); background: var(--wife-d); }
+.fc-chip.hi-devit { color: var(--devit); border-color: rgba(110,231,183,0.3); background: var(--devit-d); }
+.fc-chip.gold { color: var(--gold); border-color: rgba(251,191,36,0.3); background: var(--gold-d); }
+
+.fc-right { text-align: right; flex-shrink: 0; }
+.fc-sip { font-family: var(--mono); font-size: 17px; font-weight: 700; letter-spacing: -0.5px; }
+.fc-sip-lbl { font-size: 8px; color: var(--t3); margin-top: 2px; font-family: var(--mono); }
+
+/* Corpus row — inline editable */
+.fc-corpus-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg1); border: 1px solid var(--ln0);
+  border-radius: 8px; padding: 8px 10px; margin-bottom: 9px;
+}
+.fc-corpus-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--t3); flex: 1; font-family: var(--mono); }
+.fc-corpus-in {
+  background: transparent; border: none; outline: none;
+  color: var(--t0); font-family: var(--mono);
+  font-size: 13px; font-weight: 700;
+  text-align: right; width: 120px;
+  -webkit-appearance: none;
+}
+.fc-corpus-in:focus { color: var(--you); }
+.fc-corpus-btn {
+  background: transparent; border: 1px solid var(--ln1);
+  border-radius: 6px; padding: 3px 9px;
+  color: var(--t2); font-family: var(--mono); font-size: 9px; font-weight: 700;
+  cursor: pointer; letter-spacing: 1px; transition: all 0.15s;
+}
+.fc-corpus-btn:hover { border-color: var(--you); color: var(--you); }
+
+/* Projection mini chips */
+.fc-proj { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-bottom: 9px; }
+.fc-pj {
+  background: var(--bg1); border: 1px solid var(--ln0);
+  border-radius: 7px; padding: 7px 5px; text-align: center;
+}
+.fc-pj-r { font-size: 7px; color: var(--t3); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; font-family: var(--mono); }
+.fc-pj-v { font-size: 11px; font-weight: 700; font-family: var(--mono); }
+
+/* Action row */
+.fc-actions { display: flex; gap: 5px; }
+.fc-act {
+  flex: 1; padding: 7px 5px; border-radius: 7px; border: none;
+  font-family: var(--sora); font-size: 10px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.3px;
+}
+.fc-act:active { opacity: 0.65; }
+.act-edit   { background: rgba(96,165,250,0.10); color: var(--you);  border: 1px solid rgba(96,165,250,0.20); }
+.act-pause  { background: rgba(251,191,36,0.08); color: var(--gold); border: 1px solid rgba(251,191,36,0.20); }
+.act-resume { background: rgba(110,231,183,0.08); color: var(--devit); border: 1px solid rgba(110,231,183,0.20); }
+.act-del    { background: rgba(248,113,113,0.08); color: var(--red);  border: 1px solid rgba(248,113,113,0.20); }
+
+/* ═══════════════ NPS / PF DETAIL CARD ═══════════════ */
+.detail-card {
+  background: var(--bg2); border: 1px solid var(--ln0);
+  border-radius: var(--r2); overflow: hidden; margin-bottom: 10px;
+}
+.dc-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--ln0);
+  cursor: pointer;
+}
+.dc-hdr-left { display: flex; align-items: center; gap: 10px; }
+.dc-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dc-title { font-size: 12px; font-weight: 700; }
+.dc-sub   { font-size: 10px; color: var(--t2); margin-top: 1px; font-family: var(--mono); }
+.dc-right { display: flex; align-items: center; gap: 10px; }
+.dc-corpus { font-size: 13px; font-weight: 700; font-family: var(--mono); }
+.dc-chev   { font-size: 10px; color: var(--t3); transition: transform 0.2s; }
+.dc-chev.open { transform: rotate(180deg); }
+.dc-body { display: none; padding: 12px 14px; }
+.dc-body.open { display: block; }
+.dc-split { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.dc-split3 { grid-template-columns: 1fr 1fr 1fr; }
+.dc-box {
+  background: var(--bg1); border: 1px solid var(--ln0);
+  border-radius: 8px; padding: 9px; text-align: center;
+}
+.dc-box-lbl { font-size: 7px; letter-spacing: 2px; text-transform: uppercase; color: var(--t3); margin-bottom: 4px; font-family: var(--mono); }
+.dc-box-val { font-size: 13px; font-weight: 700; font-family: var(--mono); }
+.dc-proj { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.dc-pj  { background: var(--bg1); border: 1px solid var(--ln0); border-radius: 7px; padding: 7px; text-align: center; }
+.dc-pj-r { font-size: 7px; letter-spacing: 1.5px; color: var(--t3); text-transform: uppercase; margin-bottom: 3px; font-family: var(--mono); }
+.dc-pj-v { font-size: 12px; font-weight: 700; font-family: var(--mono); }
+
+/* ═══════════════ CHART ═══════════════ */
+.chart-wrap {
+  margin: 0 16px 12px;
+  background: var(--bg2); border: 1px solid var(--ln0);
+  border-radius: var(--r2); padding: 14px;
+}
+.cw-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.cw-title { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t2); font-family: var(--mono); }
+.cw-hz { display: flex; gap: 4px; }
+.hz-btn {
+  padding: 5px 10px; border: 1px solid var(--ln0); border-radius: 6px;
+  background: var(--bg3); color: var(--t3); font-family: var(--mono);
+  font-size: 9px; font-weight: 700; cursor: pointer; transition: all 0.15s;
+}
+.hz-btn.on { background: var(--you-d); border-color: var(--you); color: var(--you); }
+
+.proj-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; padding: 0 16px 12px; }
+.pj-card { background: var(--bg2); border: 1px solid var(--ln0); border-radius: var(--r); padding: 10px 7px; text-align: center; }
+.pj-rate { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; font-family: var(--mono); }
+.pj-val  { font-size: 13px; font-weight: 700; font-family: var(--mono); }
+
+/* ═══════════════ FORMS ═══════════════ */
+.fg { margin-bottom: 10px; }
+.fl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--t2); display: block; margin-bottom: 5px; font-family: var(--mono); }
+.fi {
+  width: 100%; background: var(--bg1); border: 1px solid var(--ln1);
+  border-radius: 9px; padding: 11px 13px;
+  color: var(--t0); font-family: var(--sora); font-size: 13px; font-weight: 500;
+  outline: none; transition: border-color 0.2s; -webkit-appearance: none; appearance: none;
+}
+.fi:focus { border-color: var(--you); }
+.fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.btn-p {
+  width: 100%; padding: 14px; background: var(--you);
+  border: none; border-radius: var(--r); color: var(--bg0);
+  font-family: var(--sora); font-size: 13px; font-weight: 800;
+  cursor: pointer; transition: opacity 0.15s; letter-spacing: 0.3px;
+  margin-top: 4px;
+}
+.btn-p:active { opacity: 0.8; }
+.btn-g {
+  width: 100%; padding: 12px; background: var(--bg3);
+  border: 1px solid var(--ln1); border-radius: var(--r); color: var(--t1);
+  font-family: var(--sora); font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.15s;
+}
+.btn-g:active { opacity: 0.7; }
+
+/* ═══════════════ MODAL ═══════════════ */
+.modal-ov {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.80);
+  z-index: 900; display: none; align-items: flex-end;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.modal-ov.open { display: flex; }
+.modal-sh {
+  background: var(--bg2); border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--ln1);
+  padding: 20px 18px calc(26px + var(--safe-b));
+  width: 100%; animation: slideUp 0.25s cubic-bezier(0.4,0,0.2,1);
+  max-height: 90dvh; overflow-y: auto;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: none; } }
+.modal-handle { width: 32px; height: 3px; background: var(--ln1); border-radius: 2px; margin: 0 auto 18px; }
+.modal-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 18px;
+}
+.modal-ttl { font-size: 16px; font-weight: 800; }
+.modal-x {
+  background: var(--bg3); border: 1px solid var(--ln0);
+  color: var(--t2); width: 28px; height: 28px; border-radius: 7px;
+  cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ═══════════════ HOME — FAMILY CARDS ═══════════════ */
+.fam-card {
+  margin: 0 16px 8px;
+  background: var(--bg2); border: 1px solid var(--ln0);
+  border-radius: var(--r2); overflow: hidden;
+}
+.fam-card-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 15px;
+  cursor: pointer;
+}
+.fam-left { display: flex; align-items: center; gap: 12px; }
+.fam-av {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+  font-family: var(--mono);
+}
+.fam-name  { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.fam-sub   { font-size: 10px; color: var(--t2); font-family: var(--mono); }
+.fam-right { display: flex; align-items: center; gap: 10px; }
+.fam-corpus{ font-family: var(--mono); font-size: 15px; font-weight: 700; }
+.fam-chev  { font-size: 10px; color: var(--t3); transition: transform 0.2s; }
+.fam-chev.open { transform: rotate(180deg); }
+.fam-body  { display: none; border-top: 1px solid var(--ln0); }
+.fam-body.open { display: block; }
+.fam-inv-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 15px; border-bottom: 1px solid var(--ln0);
+}
+.fam-inv-row:last-child { border-bottom: none; }
+.fam-inv-left  { display: flex; align-items: center; gap: 9px; }
+.fam-inv-dot   { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.fam-inv-name  { font-size: 12px; font-weight: 600; }
+.fam-inv-sub   { font-size: 9px; color: var(--t3); margin-top: 1px; font-family: var(--mono); }
+.fam-inv-right { text-align: right; }
+.fam-inv-proj  { font-size: 12px; font-weight: 700; font-family: var(--mono); }
+.fam-inv-sip   { font-size: 9px; color: var(--t2); margin-top: 1px; font-family: var(--mono); }
+
+/* ═══════════════ GOAL ═══════════════ */
+.goal-card {
+  margin: 0 16px 12px;
+  background: var(--bg2); border: 1px solid var(--ln0);
+  border-radius: var(--r2); padding: 15px;
+}
+.goal-res { margin-top: 14px; display: none; }
+.goal-res.show { display: block; }
+.goal-pct {
+  font-family: var(--mono); font-size: 36px; font-weight: 700;
+  letter-spacing: -1px; margin-bottom: 8px;
+}
+.goal-bar-bg { width: 100%; height: 3px; background: var(--ln0); border-radius: 2px; margin-bottom: 10px; overflow: hidden; }
+.goal-bar-fg { height: 100%; border-radius: 2px; transition: width 0.5s; background: var(--you); }
+.goal-meta   { font-size: 11px; color: var(--t1); line-height: 1.9; font-family: var(--mono); }
+.goal-meta strong { color: var(--t0); }
+
+/* ═══════════════ LOG TAB ═══════════════ */
+.log-filters { display: flex; gap: 6px; padding: 0 16px 12px; overflow-x: auto; scrollbar-width: none; }
+.log-filters::-webkit-scrollbar { display: none; }
+.lf-btn {
+  padding: 6px 13px; border-radius: 20px; border: 1px solid var(--ln0);
+  background: transparent; color: var(--t3);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s; letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.lf-btn.on { background: var(--you-d); border-color: var(--you); color: var(--you); }
+
+.log-list { padding: 0 16px; }
+.log-item {
+  display: flex; gap: 11px; align-items: flex-start;
+  margin-bottom: 8px;
+  background: var(--bg2); border: 1px solid var(--ln0);
+  border-radius: var(--r); padding: 11px 13px;
+}
+.log-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.log-content { flex: 1; min-width: 0; }
+.log-title { font-size: 12px; font-weight: 700; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.log-detail { font-size: 10px; color: var(--t1); font-family: var(--mono); margin-bottom: 2px; }
+.log-date   { font-size: 9px; color: var(--t3); font-family: var(--mono); }
+.log-badge {
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  font-family: var(--mono); padding: 2px 7px; border-radius: 4px;
+  flex-shrink: 0; align-self: flex-start;
+}
+
+.log-empty { text-align: center; padding: 50px 20px; color: var(--t3); font-size: 12px; line-height: 1.9; }
+
+/* ═══════════════ BACKUP ROW ═══════════════ */
+.bk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 16px 8px; }
+.bk-wrap { position: relative; }
+.bk-wrap input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+/* ═══════════════ UTILS ═══════════════ */
+.pad { padding: 0 16px; }
+.mt8  { margin-top: 8px; }
+.mt12 { margin-top: 12px; }
+.mb12 { margin-bottom: 12px; }
+.spacer { height: 18px; }
+.sep { height: 1px; background: var(--ln0); margin: 10px 0; }
+.empty { text-align: center; padding: 40px 20px; color: var(--t3); font-size: 12px; line-height: 2; }
+.empty-icon { font-size: 30px; display: block; margin-bottom: 12px; opacity: 0.5; }
+
+.toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 10px + var(--safe-b));
+  left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--bg4); border: 1px solid var(--ln1);
+  color: var(--t0); padding: 9px 20px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; opacity: 0;
+  transition: all 0.22s; z-index: 700; white-space: nowrap;
+  pointer-events: none; font-family: var(--mono);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════ HEADER ════════════════════════════ -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div class="wordmark">Wealth<span>OS</span></div>
+    <div class="hdr-right">
+      <div class="hdr-lbl">Family Corpus</div>
+      <div class="hdr-val" id="grand-corpus">₹0</div>
+    </div>
+  </div>
+  <div class="stat-strip">
+    <div class="stat-strip-item"><div class="ssl">SIP/mo</div><div class="ssv" id="ss-sip" style="color:var(--you)">₹0</div></div>
+    <div class="stat-strip-item"><div class="ssl">10yr</div><div class="ssv" id="ss-10y" style="color:var(--devit)">₹0</div></div>
+    <div class="stat-strip-item"><div class="ssl">20yr</div><div class="ssv" id="ss-20y" style="color:var(--gold)">₹0</div></div>
+    <div class="stat-strip-item"><div class="ssl">Funds</div><div class="ssv" id="ss-funds">0</div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ SCREENS ════════════════════════════ -->
+
+<!-- ── HOME ── -->
+<div class="screen active" id="screen-home">
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-eyebrow">Overview</div>
+      <div class="sh-title">Family Portfolio</div>
+    </div>
+  </div>
+
+  <!-- Family member cards -->
+  <div id="home-fam-cards"></div>
+
+  <!-- Combined chart -->
+  <div class="chart-wrap" style="margin-bottom:12px">
+    <div class="cw-header">
+      <div class="cw-title">Family Growth</div>
+      <div class="cw-hz">
+        <button class="hz-btn on" onclick="setHz('home',10,this)">10Y</button>
+        <button class="hz-btn" onclick="setHz('home',15,this)">15Y</button>
+        <button class="hz-btn" onclick="setHz('home',20,this)">20Y</button>
+      </div>
+    </div>
+    <canvas id="home-chart" height="190"></canvas>
+  </div>
+  <div class="proj-grid">
+    <div class="pj-card"><div class="pj-rate">12%</div><div class="pj-val" style="color:var(--you)" id="h-p12">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">14%</div><div class="pj-val" style="color:var(--devit)" id="h-p14">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">16%</div><div class="pj-val" style="color:var(--gold)" id="h-p16">₹0</div></div>
+  </div>
+
+  <!-- Goal tracker -->
+  <div class="goal-card">
+    <div class="sh-eyebrow" style="margin-bottom:12px">Goal Tracker</div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Target (₹)</label><input class="fi" id="g-tgt" type="number" inputmode="numeric" placeholder="50000000"></div>
+      <div class="fg"><label class="fl">In Years</label><input class="fi" id="g-yrs" type="number" inputmode="numeric" placeholder="15"></div>
+    </div>
+    <button class="btn-p" style="margin-top:0" onclick="calcGoal()">Calculate</button>
+    <div class="goal-res" id="goal-res">
+      <div class="sep"></div>
+      <div class="goal-pct" id="goal-pct">0%</div>
+      <div class="goal-bar-bg"><div class="goal-bar-fg" id="goal-bar"></div></div>
+      <div class="goal-meta" id="goal-meta"></div>
+    </div>
+  </div>
+
+  <!-- Backup -->
+  <div class="bk-row">
+    <button class="btn-g" onclick="exportData()">📤 Export</button>
+    <div class="bk-wrap">
+      <button class="btn-g" style="width:100%">📥 Import</button>
+      <input type="file" accept=".json" onchange="importData(event)">
+    </div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- ── YOU ── -->
+<div class="screen" id="screen-you">
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-eyebrow">Member</div>
+      <div class="sh-title" style="color:var(--you)">You</div>
+    </div>
+    <button class="sh-btn" style="color:var(--you);border-color:rgba(96,165,250,0.3)" onclick="openFundModal('you')">＋ Add Fund</button>
+  </div>
+
+  <div class="member-banner" style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border-color:var(--ln1)" id="you-banner">
+    <div class="mb-row">
+      <div><div class="mb-lbl">Total Monthly SIP</div><div class="mb-val" style="color:var(--you)" id="you-sip">₹0</div></div>
+      <div class="mb-right"><div class="mb-stat-label">Total Corpus</div><div class="mb-stat-val" id="you-corpus">₹0</div></div>
+    </div>
+    <div class="mb-chips" id="you-chips"></div>
+  </div>
+
+  <div class="fund-list" id="you-funds"></div>
+
+  <!-- NPS -->
+  <div class="pad mb12">
+    <div class="sh-eyebrow" style="margin-bottom:8px">NPS</div>
+    <div id="you-nps-wrap"></div>
+  </div>
+
+  <!-- PF -->
+  <div class="pad mb12">
+    <div class="sh-eyebrow" style="margin-bottom:8px">Provident Fund</div>
+    <div id="you-pf-wrap"></div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="cw-header">
+      <div class="cw-title">Your Growth</div>
+      <div class="cw-hz">
+        <button class="hz-btn on" onclick="setHz('you',10,this)">10Y</button>
+        <button class="hz-btn" onclick="setHz('you',15,this)">15Y</button>
+        <button class="hz-btn" onclick="setHz('you',20,this)">20Y</button>
+      </div>
+    </div>
+    <canvas id="you-chart" height="180"></canvas>
+  </div>
+  <div class="proj-grid">
+    <div class="pj-card"><div class="pj-rate">12%</div><div class="pj-val" style="color:var(--you)" id="you-p12">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">14%</div><div class="pj-val" style="color:var(--devit)" id="you-p14">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">16%</div><div class="pj-val" style="color:var(--gold)" id="you-p16">₹0</div></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- ── WIFE ── -->
+<div class="screen" id="screen-wife">
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-eyebrow">Member</div>
+      <div class="sh-title" style="color:var(--wife)">Wife</div>
+    </div>
+    <button class="sh-btn" style="color:var(--wife);border-color:rgba(249,168,212,0.3)" onclick="openFundModal('wife')">＋ Add Fund</button>
+  </div>
+
+  <div class="member-banner" style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border-color:var(--ln1)">
+    <div class="mb-row">
+      <div><div class="mb-lbl">Total Monthly SIP</div><div class="mb-val" style="color:var(--wife)" id="wife-sip">₹0</div></div>
+      <div class="mb-right"><div class="mb-stat-label">Total Corpus</div><div class="mb-stat-val" id="wife-corpus">₹0</div></div>
+    </div>
+    <div class="mb-chips" id="wife-chips"></div>
+  </div>
+
+  <div class="fund-list" id="wife-funds"></div>
+
+  <div class="pad mb12">
+    <div class="sh-eyebrow" style="margin-bottom:8px">Provident Fund</div>
+    <div id="wife-pf-wrap"></div>
+  </div>
+  <div class="pad mb12">
+    <div class="sh-eyebrow" style="margin-bottom:8px">NPS</div>
+    <div id="wife-nps-wrap"></div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="cw-header">
+      <div class="cw-title">Wife's Growth</div>
+      <div class="cw-hz">
+        <button class="hz-btn on" onclick="setHz('wife',10,this)">10Y</button>
+        <button class="hz-btn" onclick="setHz('wife',15,this)">15Y</button>
+        <button class="hz-btn" onclick="setHz('wife',20,this)">20Y</button>
+      </div>
+    </div>
+    <canvas id="wife-chart" height="180"></canvas>
+  </div>
+  <div class="proj-grid">
+    <div class="pj-card"><div class="pj-rate">12%</div><div class="pj-val" style="color:var(--wife)" id="wife-p12">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">14%</div><div class="pj-val" style="color:var(--devit)" id="wife-p14">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">16%</div><div class="pj-val" style="color:var(--gold)" id="wife-p16">₹0</div></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- ── DEVIT ── -->
+<div class="screen" id="screen-devit">
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-eyebrow">Member</div>
+      <div class="sh-title" style="color:var(--devit)">Devit</div>
+    </div>
+    <button class="sh-btn" style="color:var(--devit);border-color:rgba(110,231,183,0.3)" onclick="openFundModal('devit')">＋ Add Fund</button>
+  </div>
+
+  <div class="member-banner" style="background:linear-gradient(135deg,var(--bg2),var(--bg3));border-color:var(--ln1)">
+    <div class="mb-row">
+      <div><div class="mb-lbl">Total Monthly SIP</div><div class="mb-val" style="color:var(--devit)" id="devit-sip">₹0</div></div>
+      <div class="mb-right"><div class="mb-stat-label">Total Corpus</div><div class="mb-stat-val" id="devit-corpus">₹0</div></div>
+    </div>
+    <div class="mb-chips" id="devit-chips"></div>
+  </div>
+
+  <div class="fund-list" id="devit-funds"></div>
+
+  <div class="chart-wrap">
+    <div class="cw-header">
+      <div class="cw-title">Devit's Growth</div>
+      <div class="cw-hz">
+        <button class="hz-btn on" onclick="setHz('devit',10,this)">10Y</button>
+        <button class="hz-btn" onclick="setHz('devit',15,this)">15Y</button>
+        <button class="hz-btn" onclick="setHz('devit',20,this)">20Y</button>
+      </div>
+    </div>
+    <canvas id="devit-chart" height="180"></canvas>
+  </div>
+  <div class="proj-grid">
+    <div class="pj-card"><div class="pj-rate">12%</div><div class="pj-val" style="color:var(--devit)" id="devit-p12">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">14%</div><div class="pj-val" style="color:var(--you)" id="devit-p14">₹0</div></div>
+    <div class="pj-card"><div class="pj-rate">16%</div><div class="pj-val" style="color:var(--gold)" id="devit-p16">₹0</div></div>
+  </div>
+  <div class="spacer"></div>
+</div>
+
+<!-- ── LOG ── -->
+<div class="screen" id="screen-log">
+  <div class="sh">
+    <div class="sh-left">
+      <div class="sh-eyebrow">History</div>
+      <div class="sh-title" style="color:var(--gold)">Activity Log</div>
+    </div>
+    <button class="sh-btn" style="color:var(--red);border-color:rgba(248,113,113,0.3)" onclick="clearLog()">Clear All</button>
+  </div>
+  <div class="log-filters">
+    <button class="lf-btn on" onclick="filterLog('all',this)">All</button>
+    <button class="lf-btn" onclick="filterLog('you',this)">You</button>
+    <button class="lf-btn" onclick="filterLog('wife',this)">Wife</button>
+    <button class="lf-btn" onclick="filterLog('devit',this)">Devit</button>
+    <button class="lf-btn" onclick="filterLog('nps',this)">NPS</button>
+    <button class="lf-btn" onclick="filterLog('pf',this)">PF</button>
+  </div>
+  <div class="log-list" id="log-list"></div>
+  <div class="spacer"></div>
+</div>
+
+<!-- ════════════════════════════ BOTTOM NAV ════════════════════════════ -->
+<nav class="nav">
+  <button class="nb active" data-tab="home" onclick="goTab('home',this)">
+    <span class="nb-ico">⬡</span><span class="nb-lbl">Home</span>
+  </button>
+  <button class="nb" data-tab="you" onclick="goTab('you',this)">
+    <span class="nb-ico">◉</span><span class="nb-lbl">You</span>
+  </button>
+  <button class="nb" data-tab="wife" onclick="goTab('wife',this)">
+    <span class="nb-ico">◎</span><span class="nb-lbl">Wife</span>
+  </button>
+  <button class="nb" data-tab="devit" onclick="goTab('devit',this)">
+    <span class="nb-ico">◍</span><span class="nb-lbl">Devit</span>
+  </button>
+  <button class="nb" data-tab="log" onclick="goTab('log',this)">
+    <span class="nb-ico">≡</span><span class="nb-lbl">Log</span>
+  </button>
+</nav>
+
+<!-- ════════════════════════════ MODALS ════════════════════════════ -->
+
+<!-- Fund Modal -->
+<div class="modal-ov" id="fund-modal" onclick="closeOut(event,'fund-modal')">
+  <div class="modal-sh">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl" id="fm-title">Add Fund</div>
+      <button class="modal-x" onclick="closeModal('fund-modal')">✕</button>
+    </div>
+    <input type="hidden" id="fm-member">
+    <input type="hidden" id="fm-idx">
+    <div class="fg"><label class="fl">Fund Name</label>
+      <input class="fi" id="fm-name" type="text" placeholder="e.g. Mirae Asset Flexi Cap"></div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Monthly SIP (₹)</label>
+        <input class="fi" id="fm-sip" type="number" inputmode="numeric" placeholder="5000"></div>
+      <div class="fg"><label class="fl">Current Corpus (₹)</label>
+        <input class="fi" id="fm-corpus" type="number" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Return % p.a.</label>
+        <input class="fi" id="fm-ret" type="number" inputmode="decimal" placeholder="12"></div>
+      <div class="fg"><label class="fl">Step-up % / yr</label>
+        <input class="fi" id="fm-step" type="number" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <button class="btn-p" id="fm-save-btn" onclick="saveFund()">Save Fund</button>
+  </div>
+</div>
+
+<!-- NPS Modal -->
+<div class="modal-ov" id="nps-modal" onclick="closeOut(event,'nps-modal')">
+  <div class="modal-sh">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl" id="nps-modal-title">NPS Details</div>
+      <button class="modal-x" onclick="closeModal('nps-modal')">✕</button>
+    </div>
+    <input type="hidden" id="nps-member">
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Self Annual (₹)</label>
+        <input class="fi" id="nps-self" type="number" inputmode="numeric" placeholder="72000"></div>
+      <div class="fg"><label class="fl">Corporate Annual (₹)</label>
+        <input class="fi" id="nps-corp" type="number" inputmode="numeric" placeholder="28000"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Return % p.a.</label>
+        <input class="fi" id="nps-ret" type="number" inputmode="decimal" placeholder="12"></div>
+      <div class="fg"><label class="fl">Current Corpus (₹)</label>
+        <input class="fi" id="nps-corpus" type="number" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <button class="btn-p" onclick="saveNPS()">Save NPS</button>
+  </div>
+</div>
+
+<!-- PF Modal -->
+<div class="modal-ov" id="pf-modal" onclick="closeOut(event,'pf-modal')">
+  <div class="modal-sh">
+    <div class="modal-handle"></div>
+    <div class="modal-hdr">
+      <div class="modal-ttl" id="pf-modal-title">PF Details</div>
+      <button class="modal-x" onclick="closeModal('pf-modal')">✕</button>
+    </div>
+    <input type="hidden" id="pf-member">
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Self Monthly (₹)</label>
+        <input class="fi" id="pf-self" type="number" inputmode="numeric" placeholder="10000"></div>
+      <div class="fg"><label class="fl">Employer Monthly (₹)</label>
+        <input class="fi" id="pf-emp" type="number" inputmode="numeric" placeholder="10000"></div>
+    </div>
+    <div class="fg-row">
+      <div class="fg"><label class="fl">Return % p.a.</label>
+        <input class="fi" id="pf-ret" type="number" inputmode="decimal" placeholder="8.25"></div>
+      <div class="fg"><label class="fl">Current Corpus (₹)</label>
+        <input class="fi" id="pf-corpus" type="number" inputmode="numeric" placeholder="0"></div>
+    </div>
+    <button class="btn-p" onclick="savePF()">Save PF</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════ JAVASCRIPT ════════════════════════════ -->
+<script>
+'use strict';
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DEFAULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const DEFAULTS = {
+  you: {
+    funds: [
+      { id:'f1', name:'MF Portfolio',  sip:18000, corpus:0, ret:12, step:0, paused:false, updated:'' },
+      { id:'f2', name:'Gold Savings',  sip:2000,  corpus:0, ret:8,  step:0, paused:false, updated:'' }
+    ],
+    nps: { selfAnnual:100000, corpAnnual:0, corpus:0, ret:12, updated:'' },
+    pf:  { self:10000, emp:10000, corpus:0, ret:8.25, updated:'' }
+  },
+  wife: {
+    funds: [],
+    nps: null,   // not enrolled — null = show "Add NPS" button
+    pf:  { self:0, emp:0, corpus:0, ret:8.25, updated:'' }
+  },
+  devit: {
+    funds: [
+      { id:'f3', name:'Devit MF', sip:10000, corpus:0, ret:12, step:0, paused:false, updated:'' }
+    ]
+  }
+};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function ls(k)    { try { const s=localStorage.getItem('wos2_'+k); return s?JSON.parse(s):null; } catch(e){return null;} }
+function lw(k,v)  { try { localStorage.setItem('wos2_'+k, JSON.stringify(v)); } catch(e){} }
+
+let D = {
+  you:   ls('you')   || JSON.parse(JSON.stringify(DEFAULTS.you)),
+  wife:  ls('wife')  || JSON.parse(JSON.stringify(DEFAULTS.wife)),
+  devit: ls('devit') || JSON.parse(JSON.stringify(DEFAULTS.devit)),
+};
+let LOG   = ls('log')   || [];
+let HZ    = ls('hz')    || { home:10, you:10, wife:10, devit:10 };
+let LF    = 'all';       // log filter
+let CHARTS = {};
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FINANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function fv(sip, retPct, months, corpus=0, step=0) {
+  const r = retPct / 100 / 12;
+  const cFV = corpus * Math.pow(1+r, months);
+  if (!step) {
+    const sipFV = r > 0
+      ? sip * (((Math.pow(1+r,months)-1)/r) * (1+r))
+      : sip * months;
+    return sipFV + cFV;
+  }
+  // step-up loop
+  const sa = step / 100;
+  let acc = cFV;
+  for (let i=0; i<months; i++) {
+    const s2 = sip * Math.pow(1+sa, Math.floor(i/12));
+    acc += s2 * Math.pow(1+r, months-i);
+  }
+  return acc;
+}
+
+// Effective SIP for a fund (0 if paused)
+function eSip(f) { return f.paused ? 0 : f.sip; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FORMAT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function fmt(n) {
+  n = Math.round(n);
+  if (n >= 10000000) return '₹'+(n/10000000).toFixed(2)+' Cr';
+  if (n >= 100000)   return '₹'+(n/100000).toFixed(2)+' L';
+  return '₹'+n.toLocaleString('en-IN');
+}
+function fmtM(n) { return '₹'+Math.round(n).toLocaleString('en-IN'); }
+function esc(s)  { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function tsNow() {
+  const d = new Date();
+  return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) +
+         ' ' + d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+function idGen() { return 'f'+ Date.now().toString(36); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LOG HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function addLog(entry) {
+  LOG.unshift({ ...entry, ts: tsNow() });
+  if (LOG.length > 500) LOG.pop();
+  lw('log', LOG);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MEMBER TOTALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function mTotals(member, months) {
+  const d = D[member];
+  const funds = d.funds || [];
+  const nps = d.nps;
+  const pf  = d.pf;
+
+  let sipA = funds.reduce((a,f)=>a+eSip(f),0);
+  let corp = funds.reduce((a,f)=>a+f.corpus,0);
+
+  if (nps) { sipA += (nps.selfAnnual+nps.corpAnnual)/12; corp += nps.corpus; }
+  if (pf)  { sipA += pf.self+pf.emp; corp += pf.corpus; }
+
+  const ownFV = funds.reduce((a,f)=>a+fv(eSip(f),f.ret,months,f.corpus,f.step||0),0)
+    + (nps ? fv((nps.selfAnnual+nps.corpAnnual)/12, nps.ret||12, months, nps.corpus) : 0)
+    + (pf  ? fv(pf.self+pf.emp, pf.ret||8.25, months, pf.corpus) : 0);
+
+  return { sipA, corp, ownFV };
+}
+
+function allFVAtRate(ratePct, months) {
+  return ['you','wife','devit'].reduce((a,m) => {
+    const d = D[m];
+    const funds = d.funds||[];
+    let v = funds.reduce((s,f)=>s+fv(eSip(f),ratePct,months,f.corpus,f.step||0),0);
+    if (d.nps) v += fv((d.nps.selfAnnual+d.nps.corpAnnual)/12, ratePct, months, d.nps.corpus);
+    if (d.pf)  v += fv(d.pf.self+d.pf.emp, ratePct, months, d.pf.corpus);
+    return a+v;
+  },0);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CHART HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const LC = ['#60a5fa','#6ee7b7','#fbbf24'];
+
+const COPTS = (id) => ({
+  responsive:true, maintainAspectRatio:true,
+  interaction:{mode:'index',intersect:false},
+  plugins:{
+    legend:{display:true,labels:{color:'#4a5e80',font:{family:"'Space Mono'",size:8},boxWidth:8,boxHeight:1,padding:10}},
+    tooltip:{
+      backgroundColor:'#101828',borderColor:'#1c2a40',borderWidth:1,
+      titleColor:'#4a5e80',bodyColor:'#f0f6ff',
+      titleFont:{family:"'Space Mono'",size:8},
+      bodyFont:{family:"'Space Mono'",size:9},
+      callbacks:{label:ctx=>'  '+ctx.dataset.label+': '+fmt(ctx.raw)}
+    }
+  },
+  scales:{
+    x:{ticks:{color:'#2a3858',font:{family:"'Space Mono'",size:7},maxTicksLimit:6},grid:{color:'#1c2a40'}},
+    y:{ticks:{color:'#2a3858',font:{family:"'Space Mono'",size:7},callback:v=>fmt(v).replace('₹','')},grid:{color:'#1c2a40'}}
+  }
+});
+
+function mkChart(id, datasets, years) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  if (CHARTS[id]) { CHARTS[id].destroy(); delete CHARTS[id]; }
+  const labels = Array.from({length:years+1},(_,i)=>i===0?'Now':'Y'+i);
+  CHARTS[id] = new Chart(ctx, {
+    type:'line',
+    data:{labels,datasets},
+    options: COPTS(id)
+  });
+}
+
+function famDatasets(years) {
+  const clr = ['#60a5fa','#f9a8d4','#6ee7b7'];
+  return ['you','wife','devit'].map((m,i) => ({
+    label: m==='you'?'You':m==='wife'?'Wife':'Devit',
+    data: Array.from({length:years+1},(_,y)=>{
+      const d=D[m]; const f=d.funds||[];
+      let v=f.reduce((s,f2)=>s+fv(eSip(f2),f2.ret,y*12,f2.corpus,f2.step||0),0);
+      if(d.nps) v+=fv((d.nps.selfAnnual+d.nps.corpAnnual)/12,d.nps.ret||12,y*12,d.nps.corpus);
+      if(d.pf)  v+=fv(d.pf.self+d.pf.emp,d.pf.ret||8.25,y*12,d.pf.corpus);
+      return Math.round(v);
+    }),
+    borderColor:clr[i],backgroundColor:clr[i]+'10',
+    borderWidth:2,pointRadius:0,tension:0.4,fill:false
+  }));
+}
+
+function memberDatasets(member, years) {
+  const accentMap = { you:'#60a5fa', wife:'#f9a8d4', devit:'#6ee7b7' };
+  return [12,14,16].map((rate,ri) => ({
+    label: rate+'%',
+    data: Array.from({length:years+1},(_,y)=>{
+      const d=D[member]; const f=d.funds||[];
+      let v=f.reduce((s,f2)=>s+fv(eSip(f2),rate,y*12,f2.corpus,f2.step||0),0);
+      if(d.nps) v+=fv((d.nps.selfAnnual+d.nps.corpAnnual)/12,rate,y*12,d.nps.corpus);
+      if(d.pf)  v+=fv(d.pf.self+d.pf.emp,rate,y*12,d.pf.corpus);
+      return Math.round(v);
+    }),
+    borderColor:LC[ri],backgroundColor:LC[ri]+'10',
+    borderWidth:2,pointRadius:0,tension:0.4,fill:ri===0
+  }));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HEADER / TICKER UPDATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function updateHeader() {
+  const months = 120; // 10yr for header
+  let totCorp=0, totSip=0, totFunds=0;
+  ['you','wife','devit'].forEach(m=>{
+    const t=mTotals(m,months);
+    totCorp += t.corp; totSip += t.sipA;
+    totFunds += (D[m].funds||[]).length;
+  });
+  setText('grand-corpus', fmt(totCorp));
+  setText('ss-sip', fmtM(totSip));
+  setText('ss-10y', fmt(allFVAtRate(12,120)));
+  setText('ss-20y', fmt(allFVAtRate(12,240)));
+  setText('ss-funds', String(totFunds));
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RENDER HOME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderHome() {
+  const h = HZ.home, months = h*12;
+
+  // Family cards
+  const colors = { you:'var(--you)', wife:'var(--wife)', devit:'var(--devit)' };
+  const avBg   = { you:'#0d2040', wife:'#3d1030', devit:'#0d3020' };
+  document.getElementById('home-fam-cards').innerHTML = ['you','wife','devit'].map(m => {
+    const d=D[m], t=mTotals(m,months);
+    const col=colors[m];
+    const funds=d.funds||[];
+    const rows=[
+      ...funds.map(f=>({
+        name:f.name, sub:(f.paused?'PAUSED · ':'')+(f.ret)+'% · '+(f.step?'+'+f.step+'%/yr':''),
+        proj:fv(eSip(f),f.ret,months,f.corpus,f.step||0), sip:eSip(f), col
+      })),
+      ...(d.nps?[{name:'NPS',sub:((d.nps.selfAnnual+d.nps.corpAnnual)/12|0)+'/mo',proj:fv((d.nps.selfAnnual+d.nps.corpAnnual)/12,d.nps.ret||12,months,d.nps.corpus),sip:(d.nps.selfAnnual+d.nps.corpAnnual)/12,col:'var(--gold)'}]:[]),
+      ...(d.pf?[{name:'PF',sub:(d.pf.self+d.pf.emp)+'/mo',proj:fv(d.pf.self+d.pf.emp,d.pf.ret||8.25,months,d.pf.corpus),sip:d.pf.self+d.pf.emp,col:'var(--wife)'}]:[])
+    ];
+    return `<div class="fam-card">
+      <div class="fam-card-hdr" onclick="toggleFam('fb-${m}','fc-${m}')">
+        <div class="fam-left">
+          <div class="fam-av" style="background:${avBg[m]};color:${col}">${m==='you'?'Y':m==='wife'?'W':'D'}</div>
+          <div>
+            <div class="fam-name">${m==='you'?'You':m==='wife'?'Wife':'Devit'}</div>
+            <div class="fam-sub">${funds.length} fund${funds.length!==1?'s':''} · ${fmtM(t.sipA)}/mo</div>
+          </div>
+        </div>
+        <div class="fam-right">
+          <div class="fam-corpus" style="color:${col}">${fmt(t.corp)}</div>
+          <div class="fam-chev" id="fc-${m}">▾</div>
+        </div>
+      </div>
+      <div class="fam-body" id="fb-${m}">
+        ${rows.map(r=>`<div class="fam-inv-row">
+          <div class="fam-inv-left">
+            <div class="fam-inv-dot" style="background:${r.col}"></div>
+            <div><div class="fam-inv-name">${esc(r.name)}</div><div class="fam-inv-sub">${r.sub}</div></div>
+          </div>
+          <div class="fam-inv-right">
+            <div class="fam-inv-proj" style="color:${r.col}">${fmt(r.proj)}</div>
+            <div class="fam-inv-sip">${fmtM(r.sip)}/mo</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Chart
+  mkChart('home-chart', famDatasets(h), h);
+
+  // Projections
+  setText('h-p12', fmt(allFVAtRate(12,months)));
+  setText('h-p14', fmt(allFVAtRate(14,months)));
+  setText('h-p16', fmt(allFVAtRate(16,months)));
+  updateHeader();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RENDER MEMBER (you/wife/devit)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const FUND_PAL = ['#60a5fa','#6ee7b7','#fbbf24','#f9a8d4','#a78bfa','#fb923c','#34d399','#f472b6','#38bdf8','#e879f9'];
+
+function renderMember(m) {
+  const d=D[m], h=HZ[m], months=h*12;
+  const funds=d.funds||[];
+  const accentVar = m==='you'?'var(--you)':m==='wife'?'var(--wife)':'var(--devit)';
+  const hiCls = m==='you'?'hi':m==='wife'?'hi-wife':'hi-devit';
+
+  // Banner
+  const totSip  = funds.reduce((a,f)=>a+eSip(f),0) + (d.nps?(d.nps.selfAnnual+d.nps.corpAnnual)/12:0) + (d.pf?d.pf.self+d.pf.emp:0);
+  const totCorp = funds.reduce((a,f)=>a+f.corpus,0) + (d.nps?d.nps.corpus:0) + (d.pf?d.pf.corpus:0);
+  setText(m+'-sip',    fmtM(totSip));
+  setText(m+'-corpus', fmt(totCorp));
+
+  // Chips
+  const activeF = funds.filter(f=>!f.paused).length;
+  const pausedF = funds.filter(f=>f.paused).length;
+  document.getElementById(m+'-chips').innerHTML =
+    `<div class="mb-chip">${activeF} Active</div>` +
+    (pausedF?`<div class="mb-chip" style="color:var(--gold)">${pausedF} Paused</div>`:'') +
+    (d.nps?`<div class="mb-chip" style="color:var(--gold)">NPS</div>`:'') +
+    (d.pf?`<div class="mb-chip" style="color:var(--wife)">PF</div>`:'');
+
+  // Fund cards
+  const listEl = document.getElementById(m+'-funds');
+  if (!funds.length) {
+    listEl.innerHTML = `<div class="empty"><span class="empty-icon">◎</span>No funds yet.<br>Tap <strong>+ Add Fund</strong> to get started.</div>`;
+  } else {
+    listEl.innerHTML = funds.map((f,i)=>{
+      const col = FUND_PAL[i%FUND_PAL.length];
+      const fv12 = fv(eSip(f),12,months,f.corpus,f.step||0);
+      const fv14 = fv(eSip(f),14,months,f.corpus,f.step||0);
+      const fvOwn= fv(eSip(f),f.ret,months,f.corpus,f.step||0);
+      const upd  = f.updated ? 'Updated '+f.updated : 'Not updated';
+      return `<div class="fund-card${f.paused?' paused':''}">
+        <div class="fc-stripe" style="background:${col}"></div>
+        <div class="fc-main">
+          <div class="fc-row1">
+            <div class="fc-left">
+              <div class="fc-name">${esc(f.name)}</div>
+              <div class="fc-chips">
+                <span class="fc-chip ${hiCls}">${f.ret}% p.a.</span>
+                ${f.step?`<span class="fc-chip gold">+${f.step}%/yr</span>`:''}
+                <span class="fc-chip">${upd}</span>
+                ${f.paused?`<span class="fc-chip gold">PAUSED</span>`:''}
+              </div>
+            </div>
+            <div class="fc-right">
+              <div class="fc-sip" style="color:${col}">${fmtM(eSip(f))}</div>
+              <div class="fc-sip-lbl">/month${f.paused?' (paused)':''}</div>
+            </div>
+          </div>
+          <div class="fc-corpus-row">
+            <div class="fc-corpus-lbl">Corpus</div>
+            <input class="fc-corpus-in" type="number" inputmode="numeric"
+              value="${f.corpus}" id="ci-${m}-${i}"
+              onkeydown="if(event.key==='Enter'){saveCorpus('${m}',${i});event.target.blur();}">
+            <button class="fc-corpus-btn" onclick="saveCorpus('${m}',${i})">Save</button>
+          </div>
+          <div class="fc-proj">
+            <div class="fc-pj"><div class="fc-pj-r">12%</div><div class="fc-pj-v" style="color:var(--you)">${fmt(fv12)}</div></div>
+            <div class="fc-pj"><div class="fc-pj-r">14%</div><div class="fc-pj-v" style="color:var(--devit)">${fmt(fv14)}</div></div>
+            <div class="fc-pj"><div class="fc-pj-r">${f.ret}% own</div><div class="fc-pj-v" style="color:var(--gold)">${fmt(fvOwn)}</div></div>
+          </div>
+          <div class="fc-actions">
+            <button class="fc-act act-edit" onclick="openEditFund('${m}',${i})">✎ Edit</button>
+            <button class="fc-act ${f.paused?'act-resume':'act-pause'}"
+              onclick="togglePause('${m}',${i})">${f.paused?'▶ Resume':'⏸ Pause'}</button>
+            <button class="fc-act act-del" onclick="deleteFund('${m}',${i})">✕ Delete</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // NPS card
+  if (m === 'you' || m === 'wife') renderNPSCard(m, h);
+
+  // PF card
+  if (m === 'you' || m === 'wife') renderPFCard(m, h);
+
+  // Chart
+  mkChart(m+'-chart', memberDatasets(m,h), h);
+
+  // Projections
+  const p12=allFVAtRate(12,months), p14=allFVAtRate(14,months), p16=allFVAtRate(16,months);
+  // per-member projections
+  function memFV(rate) {
+    const dd=D[m]; const ff=dd.funds||[];
+    let v=ff.reduce((s,f2)=>s+fv(eSip(f2),rate,months,f2.corpus,f2.step||0),0);
+    if(dd.nps) v+=fv((dd.nps.selfAnnual+dd.nps.corpAnnual)/12,rate,months,dd.nps.corpus);
+    if(dd.pf)  v+=fv(dd.pf.self+dd.pf.emp,rate,months,dd.pf.corpus);
+    return v;
+  }
+  setText(m+'-p12', fmt(memFV(12)));
+  setText(m+'-p14', fmt(memFV(14)));
+  setText(m+'-p16', fmt(memFV(16)));
+
+  updateHeader();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NPS CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderNPSCard(m, h) {
+  const wrapId = m+'-nps-wrap';
+  const el = document.getElementById(wrapId);
+  if (!el) return;
+
+  const nps = D[m].nps;
+  if (!nps) {
+    // Not enrolled
+    el.innerHTML = `<div class="detail-card">
+      <div class="dc-header" style="cursor:default">
+        <div class="dc-hdr-left">
+          <div class="dc-dot" style="background:var(--gold)"></div>
+          <div><div class="dc-title">NPS</div><div class="dc-sub">Not enrolled</div></div>
+        </div>
+        <button class="fc-act act-edit" style="padding:6px 14px" onclick="openNPSModal('${m}')">＋ Add NPS</button>
+      </div>
+    </div>`;
+    return;
+  }
+
+  const selfM = nps.selfAnnual/12, corpM = nps.corpAnnual/12, totM = selfM+corpM;
+  const months = h*12;
+  const fv12 = fv(totM,12,months,nps.corpus), fv14=fv(totM,14,months,nps.corpus), fvOwn=fv(totM,nps.ret||12,months,nps.corpus);
+
+  el.innerHTML = `<div class="detail-card">
+    <div class="dc-header" onclick="togDC('nps-body-${m}','nps-chev-${m}')">
+      <div class="dc-hdr-left">
+        <div class="dc-dot" style="background:var(--gold)"></div>
+        <div>
+          <div class="dc-title">NPS</div>
+          <div class="dc-sub">${fmtM(totM)}/mo · ${nps.ret||12}% p.a.</div>
+        </div>
+      </div>
+      <div class="dc-right">
+        <div class="dc-corpus" style="color:var(--gold)">${fmt(nps.corpus)}</div>
+        <div class="dc-chev" id="nps-chev-${m}">▾</div>
+      </div>
+    </div>
+    <div class="dc-body" id="nps-body-${m}">
+      <div class="dc-split dc-split3">
+        <div class="dc-box"><div class="dc-box-lbl">Self/yr</div><div class="dc-box-val" style="color:var(--gold)">${fmt(nps.selfAnnual)}</div></div>
+        <div class="dc-box"><div class="dc-box-lbl">Corp/yr</div><div class="dc-box-val" style="color:var(--gold)">${fmt(nps.corpAnnual)}</div></div>
+        <div class="dc-box"><div class="dc-box-lbl">Corpus</div><div class="dc-box-val">${fmt(nps.corpus)}</div></div>
+      </div>
+      <div class="dc-proj">
+        <div class="dc-pj"><div class="dc-pj-r">12%</div><div class="dc-pj-v" style="color:var(--you)">${fmt(fv12)}</div></div>
+        <div class="dc-pj"><div class="dc-pj-r">14%</div><div class="dc-pj-v" style="color:var(--devit)">${fmt(fv14)}</div></div>
+        <div class="dc-pj"><div class="dc-pj-r">${nps.ret||12}% own</div><div class="dc-pj-v" style="color:var(--gold)">${fmt(fvOwn)}</div></div>
+      </div>
+      <button class="btn-g" onclick="openNPSModal('${m}')">Edit NPS</button>
+    </div>
+  </div>`;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PF CARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function renderPFCard(m, h) {
+  const wrapId = m+'-pf-wrap';
+  const el = document.getElementById(wrapId);
+  if (!el) return;
+  const pf = D[m].pf || { self:0, emp:0, corpus:0, ret:8.25, updated:'' };
+  const totM=pf.self+pf.emp, months=h*12;
+  const fv12=fv(totM,12,months,pf.corpus), fv14=fv(totM,14,months,pf.corpus), fvOwn=fv(totM,pf.ret||8.25,months,pf.corpus);
+
+  el.innerHTML = `<div class="detail-card">
+    <div class="dc-header" onclick="togDC('pf-body-${m}','pf-chev-${m}')">
+      <div class="dc-hdr-left">
+        <div class="dc-dot" style="background:var(--wife)"></div>
+        <div>
+          <div class="dc-title">PF</div>
+          <div class="dc-sub">${fmtM(totM)}/mo · ${pf.ret||8.25}% p.a.</div>
+        </div>
+      </div>
+      <div class="dc-right">
+        <div class="dc-corpus" style="color:var(--wife)">${fmt(pf.corpus)}</div>
+        <div class="dc-chev" id="pf-chev-${m}">▾</div>
+      </div>
+    </div>
+    <div class="dc-body" id="pf-body-${m}">
+      <div class="dc-split dc-split3">
+        <div class="dc-box"><div class="dc-box-lbl">Self/mo</div><div class="dc-box-val" style="color:var(--wife)">${fmtM(pf.self)}</div></div>
+        <div class="dc-box"><div class="dc-box-lbl">Employer/mo</div><div class="dc-box-val" style="color:var(--wife)">${fmtM(pf.emp)}</div></div>
+        <div class="dc-box"><div class="dc-box-lbl">Corpus</div><div class="dc-box-val">${fmt(pf.corpus)}</div></div>
+      </div>
+      <div class="dc-proj">
+        <div class="dc-pj"><div class="dc-pj-r">12%</div><div class="dc-pj-v" style="color:var(--you)">${fmt(fv12)}</div></div>
+        <div class="dc-pj"><div class="dc-pj-r">14%</div><div class="dc-pj-v" style="color:var(--devit)">${fmt(fv14)}</div></div>
+        <div class="dc-pj"><div class="dc-pj-r">${pf.ret||8.25}% own</div><div class="dc-pj-v" style="color:var(--gold)">${fmt(fvOwn)}</div></div>
+      </div>
+      <button class="btn-g" onclick="openPFModal('${m}')">Edit PF</button>
+    </div>
+  </div>`;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CORPUS INLINE SAVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function saveCorpus(m, idx) {
+  const inp = document.getElementById('ci-'+m+'-'+idx);
+  if (!inp) return;
+  const newCorpus = parseFloat(inp.value) || 0;
+  const old = D[m].funds[idx].corpus;
+  if (old === newCorpus) return;
+  D[m].funds[idx].corpus  = newCorpus;
+  D[m].funds[idx].updated = tsNow().split(',')[0];
+  lw(m, D[m]);
+  addLog({ type:'corpus', member:m, fund:D[m].funds[idx].name, old, new:newCorpus });
+  renderMember(m);
+  renderHome();
+  toast('✅ Corpus updated');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PAUSE / RESUME
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function togglePause(m, idx) {
+  const f = D[m].funds[idx];
+  const wasPaused = f.paused;
+  f.paused = !wasPaused;
+  lw(m, D[m]);
+  addLog({ type: wasPaused?'resume':'pause', member:m, fund:f.name, sip:f.sip });
+  renderMember(m); renderHome();
+  toast(wasPaused ? '▶ SIP resumed' : '⏸ SIP paused — corpus still grows');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FUND MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function openFundModal(m) {
+  setV('fm-member',m); setV('fm-idx','');
+  setV('fm-name',''); setV('fm-sip',''); setV('fm-corpus','');
+  setV('fm-ret','12'); setV('fm-step','0');
+  setText('fm-title','Add Fund');
+  setText('fm-save-btn','Add Fund');
+  openModal('fund-modal');
+  setTimeout(()=>gEl('fm-name').focus(),320);
+}
+function openEditFund(m, idx) {
+  const f=D[m].funds[idx];
+  setV('fm-member',m); setV('fm-idx',idx);
+  setV('fm-name',f.name); setV('fm-sip',f.sip);
+  setV('fm-corpus',f.corpus); setV('fm-ret',f.ret); setV('fm-step',f.step||0);
+  setText('fm-title','Edit Fund');
+  setText('fm-save-btn','Update Fund');
+  openModal('fund-modal');
+}
+function saveFund() {
+  const m   = gEl('fm-member').value;
+  const idx = gEl('fm-idx').value;
+  const name  = gEl('fm-name').value.trim();
+  const sip   = parseFloat(gEl('fm-sip').value)||0;
+  const corpus= parseFloat(gEl('fm-corpus').value)||0;
+  const ret   = parseFloat(gEl('fm-ret').value)||12;
+  const step  = parseFloat(gEl('fm-step').value)||0;
+
+  if (!name) { highlight('fm-name'); toast('Enter fund name'); return; }
+
+  if (idx === '') {
+    const fund = { id:idGen(), name, sip, corpus, ret, step, paused:false, updated:corpus?tsNow().split(',')[0]:'' };
+    D[m].funds.push(fund);
+    addLog({ type:'add', member:m, fund:name, sip, corpus, ret });
+    toast('✅ Fund added');
+  } else {
+    const i=parseInt(idx), old=D[m].funds[i];
+    const changed = [];
+    if (old.sip !== sip) { addLog({ type:'sip', member:m, fund:name, old:old.sip, new:sip }); changed.push('SIP'); }
+    if (old.ret !== ret) { addLog({ type:'ret', member:m, fund:name, old:old.ret, new:ret }); changed.push('Return'); }
+    if (old.corpus !== corpus) { addLog({ type:'corpus', member:m, fund:name, old:old.corpus, new:corpus }); changed.push('Corpus'); }
+    D[m].funds[i] = { ...old, name, sip, corpus, ret, step, updated:tsNow().split(',')[0] };
+    toast('✅ Fund updated' + (changed.length?' ('+changed.join(', ')+')':''));
+  }
+  lw(m, D[m]);
+  closeModal('fund-modal');
+  renderMember(m); renderHome();
+}
+function deleteFund(m, idx) {
+  if (!confirm('Delete "'+D[m].funds[idx].name+'"?')) return;
+  const f = D[m].funds[idx];
+  addLog({ type:'delete', member:m, fund:f.name, sip:f.sip });
+  D[m].funds.splice(idx,1);
+  lw(m,D[m]);
+  renderMember(m); renderHome();
+  toast('🗑 Fund removed');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   NPS MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function openNPSModal(m) {
+  const n = D[m].nps || {};
+  setV('nps-member',m);
+  setV('nps-self',   n.selfAnnual||100000);
+  setV('nps-corp',   n.corpAnnual||0);
+  setV('nps-ret',    n.ret||12);
+  setV('nps-corpus', n.corpus||0);
+  setText('nps-modal-title','NPS — '+(m==='you'?'You':m==='wife'?'Wife':'Devit'));
+  openModal('nps-modal');
+}
+function saveNPS() {
+  const m   = gEl('nps-member').value;
+  const old = D[m].nps;
+  const updated = {
+    selfAnnual: parseFloat(gEl('nps-self').value)||0,
+    corpAnnual: parseFloat(gEl('nps-corp').value)||0,
+    ret:        parseFloat(gEl('nps-ret').value)||12,
+    corpus:     parseFloat(gEl('nps-corpus').value)||0,
+    updated: tsNow().split(',')[0]
+  };
+  if (old && old.corpus !== updated.corpus) addLog({type:'corpus',member:m,fund:'NPS',old:old.corpus,new:updated.corpus});
+  if (!old) addLog({type:'add',member:m,fund:'NPS',sip:(updated.selfAnnual+updated.corpAnnual)/12,corpus:updated.corpus,ret:updated.ret});
+  D[m].nps = updated;
+  lw(m,D[m]);
+  closeModal('nps-modal');
+  renderMember(m); renderHome();
+  toast('✅ NPS saved');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PF MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function openPFModal(m) {
+  const p=D[m].pf||{};
+  setV('pf-member',m);
+  setV('pf-self',   p.self||0);
+  setV('pf-emp',    p.emp||0);
+  setV('pf-ret',    p.ret||8.25);
+  setV('pf-corpus', p.corpus||0);
+  setText('pf-modal-title','PF — '+(m==='you'?'You':m==='wife'?'Wife':'Devit'));
+  openModal('pf-modal');
+}
+function savePF() {
+  const m   = gEl('pf-member').value;
+  const old = D[m].pf||{};
+  const updated = {
+    self:   parseFloat(gEl('pf-self').value)||0,
+    emp:    parseFloat(gEl('pf-emp').value)||0,
+    ret:    parseFloat(gEl('pf-ret').value)||8.25,
+    corpus: parseFloat(gEl('pf-corpus').value)||0,
+    updated: tsNow().split(',')[0]
+  };
+  if (old.corpus !== updated.corpus) addLog({type:'corpus',member:m,fund:'PF',old:old.corpus||0,new:updated.corpus});
+  D[m].pf = updated;
+  lw(m,D[m]);
+  closeModal('pf-modal');
+  renderMember(m); renderHome();
+  toast('✅ PF saved');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LOG TAB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const LOG_ICONS = { add:'＋', delete:'✕', sip:'↕', corpus:'◈', ret:'%', pause:'⏸', resume:'▶' };
+const LOG_COLORS = { you:'var(--you)', wife:'var(--wife)', devit:'var(--devit)', nps:'var(--gold)', pf:'var(--wife)' };
+const LOG_BADGE_STYLES = {
+  add:    'background:rgba(110,231,183,0.12);color:var(--devit);border:1px solid rgba(110,231,183,0.3)',
+  delete: 'background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.3)',
+  sip:    'background:rgba(96,165,250,0.12);color:var(--you);border:1px solid rgba(96,165,250,0.3)',
+  corpus: 'background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.3)',
+  ret:    'background:rgba(167,139,250,0.12);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)',
+  pause:  'background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.3)',
+  resume: 'background:rgba(110,231,183,0.12);color:var(--devit);border:1px solid rgba(110,231,183,0.3)',
+};
+
+function renderLog() {
+  const el = document.getElementById('log-list');
+  const filtered = LF === 'all' ? LOG : LOG.filter(e => {
+    if (LF === 'nps') return e.fund === 'NPS';
+    if (LF === 'pf')  return e.fund === 'PF';
+    return e.member === LF;
+  });
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="log-empty">◎<br>No activity yet.<br>Changes to funds, corpus,<br>and SIP amounts appear here.</div>`;
+    return;
+  }
+
+  function logDetail(e) {
+    if (e.type==='sip')    return `${fmtM(e.old)} → ${fmtM(e.new)}`;
+    if (e.type==='corpus') return `${fmt(e.old)} → ${fmt(e.new)}`;
+    if (e.type==='ret')    return `${e.old}% → ${e.new}%`;
+    if (e.type==='add')    return `SIP ${fmtM(e.sip||0)} · Corpus ${fmt(e.corpus||0)} · ${e.ret||12}%`;
+    if (e.type==='pause')  return `SIP ${fmtM(e.sip)} paused — corpus keeps growing`;
+    if (e.type==='resume') return `SIP ${fmtM(e.sip)} resumed`;
+    if (e.type==='delete') return `SIP was ${fmtM(e.sip||0)}`;
+    return '';
+  }
+  function logTitle(e) {
+    const member = e.member==='you'?'You':e.member==='wife'?'Wife':'Devit';
+    const typeStr = {add:'Added',delete:'Deleted',sip:'SIP Changed',corpus:'Corpus Updated',ret:'Return % Changed',pause:'SIP Paused',resume:'SIP Resumed'}[e.type]||e.type;
+    return `${member} · ${esc(e.fund||'')} · ${typeStr}`;
+  }
+
+  el.innerHTML = filtered.map(e=>`
+    <div class="log-item">
+      <div class="log-icon">${LOG_ICONS[e.type]||'·'}</div>
+      <div class="log-content">
+        <div class="log-title">${logTitle(e)}</div>
+        <div class="log-detail">${logDetail(e)}</div>
+        <div class="log-date">${e.ts||''}</div>
+      </div>
+      <div class="log-badge" style="${LOG_BADGE_STYLES[e.type]||''}">${e.type}</div>
+    </div>`).join('');
+}
+
+function filterLog(f, btn) {
+  LF = f;
+  document.querySelectorAll('.lf-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderLog();
+}
+function clearLog() {
+  if (!confirm('Clear all log entries?')) return;
+  LOG = []; lw('log',LOG); renderLog(); toast('🗑 Log cleared');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GOAL TRACKER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function calcGoal() {
+  const tgt  = parseFloat(gEl('g-tgt').value)||0;
+  const yrs  = parseFloat(gEl('g-yrs').value)||10;
+  if (!tgt) { toast('Enter a target amount'); return; }
+  const months = yrs*12;
+  const proj   = allFVAtRate(12, months);
+  const pct    = Math.min(proj/tgt*100, 999);
+  const onTrack= proj >= tgt;
+  const resEl  = gEl('goal-res');
+  resEl.classList.add('show');
+  gEl('goal-pct').textContent = pct.toFixed(1)+'%';
+  gEl('goal-pct').style.color = onTrack?'var(--devit)':'var(--gold)';
+  gEl('goal-bar').style.width = Math.min(pct,100)+'%';
+  gEl('goal-bar').style.background = onTrack?'var(--devit)':'var(--gold)';
+  gEl('goal-meta').innerHTML = `Projected <strong>${fmt(proj)}</strong> in ${yrs} yrs &nbsp;|&nbsp; Target <strong>${fmt(tgt)}</strong><br>`+
+    (onTrack
+      ? `<span style="color:var(--devit)">✓ On track — surplus ${fmt(proj-tgt)}</span>`
+      : `<span style="color:var(--red)">↓ Shortfall ${fmt(tgt-proj)} at 12% p.a.</span>`);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   HORIZON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function setHz(tab, yrs, btn) {
+  HZ[tab] = yrs; lw('hz',HZ);
+  btn.closest('.cw-hz').querySelectorAll('.hz-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if (tab==='home')  renderHome();
+  if (tab==='you')   renderMember('you');
+  if (tab==='wife')  renderMember('wife');
+  if (tab==='devit') renderMember('devit');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TAB SWITCHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function goTab(name, el) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  gEl('screen-'+name).classList.add('active');
+  el.classList.add('active');
+  if (name==='home')  renderHome();
+  if (name==='you')   renderMember('you');
+  if (name==='wife')  renderMember('wife');
+  if (name==='devit') renderMember('devit');
+  if (name==='log')   renderLog();
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FAMILY CARD TOGGLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function toggleFam(bodyId, chevId) {
+  const b=gEl(bodyId), c=gEl(chevId);
+  if (!b||!c) return;
+  const open = b.classList.toggle('open');
+  c.classList.toggle('open', open);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DETAIL CARD TOGGLE (NPS/PF)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function togDC(bodyId, chevId) {
+  const b=gEl(bodyId), c=gEl(chevId);
+  if (!b||!c) return;
+  const open = b.classList.toggle('open');
+  c.classList.toggle('open', open);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MODAL HELPERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function openModal(id)  { gEl(id).classList.add('open'); }
+function closeModal(id) { gEl(id).classList.remove('open'); }
+function closeOut(e,id) { if(e.target===gEl(id)) closeModal(id); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EXPORT / IMPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function exportData() {
+  const blob=new Blob([JSON.stringify({D,LOG},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='wealthos_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('📤 Exported');
+}
+function importData(e) {
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try {
+      const imp=JSON.parse(r.result);
+      if(!imp.D||!imp.D.you||!imp.D.wife||!imp.D.devit) throw 0;
+      D=imp.D; LOG=imp.LOG||[];
+      lw('you',D.you); lw('wife',D.wife); lw('devit',D.devit); lw('log',LOG);
+      renderHome(); renderMember('you'); renderMember('wife'); renderMember('devit');
+      toast('📥 Imported');
+    } catch(_){ toast('❌ Invalid file'); }
+  };
+  r.readAsText(file); e.target.value='';
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   UTILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function gEl(id)    { return document.getElementById(id); }
+function setText(id,v){ const e=gEl(id); if(e) e.textContent=v; }
+function setV(id,v)   { const e=gEl(id); if(e) e.value=v; }
+function highlight(id){ const e=gEl(id); if(!e)return; e.style.borderColor='var(--red)'; setTimeout(()=>e.style.borderColor='',1400); }
+function toast(msg) {
+  const t=gEl('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') {
+    ['fund-modal','nps-modal','pf-modal'].forEach(id=>closeModal(id));
+  }
+  if (e.key==='Enter') {
+    if (gEl('fund-modal').classList.contains('open')) saveFund();
+  }
+});
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   INIT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderHome();
+  renderMember('you');
+  renderMember('wife');
+  renderMember('devit');
+  renderLog();
+});
+</script>
+</body>
+</html>
